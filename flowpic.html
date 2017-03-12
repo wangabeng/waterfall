@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Document</title>
+<style>
+#content{
+	width:850px;
+	margin:20px auto;
+	border:1px solid gray;
+	overflow:hidden;
+	word-break: break-all;
+}
+#content li{
+	width:200px;
+	float:left;
+	list-style:none;
+	text-align:center;
+	padding-left:10px;
+}
+#content li div{
+	margin-top:40px;
+	border:1px solid gray;
+	width:200px;
+}
+#content li img{
+	width:200px;
+	display:block;
+}
+</style>
+<script src="myjs.js"></script>
+<script>
+window.onload=function(){
+	var oUl=document.getElementById("content");
+	var aLi=oUl.getElementsByTagName("li");
+	var iLength=aLi.length;
+	//alert(length);
+	var onOff=true;//定义ipage++的总开关 开启的时候 是可以自动加的
+
+	//初始化 page为第一页的时候
+	var iPage=1;
+	getAjax();
+
+	function getAjax(){
+		ajax("get","getPics.php","cpage="+iPage,function(data){
+			//alert(_index);
+			//alert(typeof JSON.parse(data));
+			var data=JSON.parse(data);//把string转换成json格式 卡在这里卡了很久 切记
+
+			//每次往li里添加一个数据;
+			for (var i=0;i<data.length ;i++ )
+			{
+				//每次取数据的时候 就把总开关关闭
+				onOff=false;
+
+				var _index=getShort();//获取最短一列的li的索引值
+				//alert(_index);
+
+				var oDiv=document.createElement("div");
+				var oPic=document.createElement("img");
+				var oP=document.createElement("p");
+
+				oPic.src=data[i].preview;
+				oPic.style.width="200px";
+				oPic.style.height=data[i].height * ( 200 / data[i].width ) + 'px';
+				oP.innerHTML=data[i].title;
+
+				oDiv.appendChild(oPic);
+				oDiv.appendChild(oP);
+
+				aLi[_index].appendChild(oDiv);
+				//console.log(data[i].preview+"and"+data[i].title);
+				//console.log(22+"<br>");
+				/*if (i==data.length-1)
+				{
+					onOff=true;
+				}*/
+
+			}
+			onOff=true;//循环完毕后把开关打开 也可以在加载到最后一个数据时候把开关打开
+
+		});
+	}
+
+	//设置瀑布流
+	window.onscroll=function(){
+		//逻辑 滚动时 如果最短的li的top+offsetHeight小于滚动距离+可视区高度 就开始加载下一页
+		var iShort=getShort();
+		var shortTop=getPos(aLi[iShort]);
+		var scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
+		if (shortTop.top+aLi[iShort].offsetHeight-1050<scrollTop+document.documentElement.clientHeight)
+		{
+			//如果滚动距离符合条件 并且
+			if (onOff)
+			{
+				iPage++;
+				getAjax();
+				console.log(iPage);
+				onOff=false;
+			}
+			
+		}
+	};
+
+	//封装一个找最短li的函数
+	function getShort(){
+		var index=0;
+		var iH=aLi[index].offsetHeight;
+		for (var i=0;i<iLength ;i++ )
+		{
+			if (iH>aLi[i].offsetHeight)
+			{
+				index=i;
+				iH=aLi[i].offsetHeight;
+			}
+		}
+		return index;
+	}
+	
+
+};
+</script>
+</head>
+<body>
+<ul id="content">
+	<li></li>
+	<li></li>
+	<li></li>
+	<li></li>
+	<!--<li>
+		<div>
+			<img src="images/1.jpg">
+			<h2>222</h2>
+			<p>maioshushsushushs</p>
+		</div>
+	</li>
+	<li>
+		<div>
+			<img src="images/1.jpg">
+			<h2>222</h2>
+			<p>maioshushsushushs</p>
+		</div>
+	</li>
+	<li>
+		<div>
+			<img src="images/2.jpg">
+			<h2>222</h2>
+			<p>maioshushsushushs</p>
+		</div>
+	</li>
+	<li>
+		<div>
+			<img src="images/1.jpg">
+			<h2>222</h2>
+			<p>maioshushsushushs</p>
+		</div>
+		<div>
+			<img src="images/2.jpg">
+			<h2>222</h2>
+			<p>maioshushsushushs</p>
+		</div>
+	</li>-->
+</ul>
+
+</body>
+</html>
